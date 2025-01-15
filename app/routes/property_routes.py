@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from schemas.property_schemas import PropertyCreate, PropertySearchCriteria
+from schemas.property_schemas import PropertyCreate
 from services.property_manager import PropertyManager
 from utils.user import get_current_user
 from services.property_search import PropertySearch
