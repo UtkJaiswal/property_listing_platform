@@ -34,4 +34,19 @@ class PropertySearch:
         )
 
         return sorted_results
+    
+
+    def shortlist_property(self, user_id: str, property_id: str) -> bool:
+
+        if property_id not in self.status_index["available"]:
+            return False
+        
+
+        if user_id not in self.user_shortlists:
+            self.user_shortlists[user_id] = set()
+
+        
+        self.user_shortlists[user_id].add(property_id)
+        
+        return True
         
