@@ -47,6 +47,17 @@ class PropertySearch:
 
         
         self.user_shortlists[user_id].add(property_id)
-        
+
         return True
+    
+
+    def get_shortlisted(self, user_id: str) -> list[Property]:
+
+        shortlisted_ids  = self.user_shortlists.get(user_id, set())
+        
+        return [
+            self.property_storage[pid]
+            for pid in shortlisted_ids 
+            if pid in self.status_index["available"]
+        ]
         
