@@ -21,3 +21,18 @@ class PropertyManager:
         self.status_index["available"].add(property_id)
 
         return property_id
+    
+
+    def update_property_status(self, property_id: str, status: str, user_id: str) -> bool:
+        property_obj = self.property_storage.get(property_id)
+        
+        if not property_obj or property_obj.user_id != user_id:
+            return False
+        
+        self.status_index[property_obj.status].remove(property_id)
+
+        property_obj.status = status
+
+        self.status_index[status].add(property_id)
+
+        return True
