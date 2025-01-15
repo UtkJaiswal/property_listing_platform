@@ -36,3 +36,11 @@ class PropertyManager:
         self.status_index[status].add(property_id)
 
         return True
+    
+    def get_user_properties(self, user_id: str) -> list[Property]:
+        property_ids = self.user_portfolios.get(user_id, [])
+        return sorted(
+            [self.property_storage[pid] for pid in property_ids],
+            key = lambda p: p.timestamp,
+            reverse=True
+        )
