@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from services.property_manager import PropertyManager
 from utils.user import get_current_user
 from services.property_search import PropertySearch
-from typing import Optional
-from models.property import Property, PropertyDetails
+from typing import Optional, List
+from models.property import PropertyDetails
 
 
 router = APIRouter()
@@ -73,10 +73,27 @@ async def shortlist_property(
     property_id: str,
     current_user: str = Depends(get_current_user)
 ):
-    success = await property_search.shortlist_property(current_user, property_id)
-    if not success:
-        raise HTTPException(
-            status_code=400,
-            detail="Property not available for shortlisting"
-        )
-    return {"message": "Property shortlisted successfully"}
+    try:
+        success = await property_search.shortlist_property(current_user, property_id)
+        if not success:
+            raise HTTPException(
+                status_code=400,
+                detail="Property not available for shortlisting"
+            )
+        return {"message": "Property shortlisted successfully"}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+
+@router.get("/properties/shortlisted", response_model=List[dict], status_code=200)
+async def get_shortlisted_properties(
+    current_user: str = Depends(get_current_user)
+):
+    try:
+        properties = await property_search.get_shortlisted(current_user)
+        return [p.to_dict() for p in properties]
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
