@@ -24,15 +24,45 @@ class PropertyManager:
         self.portfolio_lock = Lock()
 
 
-    def add_property(self, user_id: str, property_details: dict) -> str:
-        property_id = str(uuid.uuid4())
-        property_object = Property(property_id, user_id, property_details)
-        self.property_storage[property_id] = property_object
-        
-        if user_id not in self.user_portfolios:
-            self.user_portfolios[user_id] = []
+    async def _update_indices(self, property_obj: Property):
+        async with self.index_lock:
+            
+            price = property_obj.details.price
+            if price not in self.price_index:
+                self.price_index[price] = set()
+            self.price_index[price].add(property_obj.property_id)
+            
+            
+            location = property_obj.details.location.lower()
+            if location not in self.location_index:
+                self.location_index[location] = set()
+            self.location_index[location].add(property_obj.property_id)
+            
+            
+            prop_type = property_obj.details.property_type.lower()
+            if prop_type not in self.type_index:
+                self.type_index[prop_type] = set()
+            self.type_index[prop_type].add(property_obj.property_id)
+            
+            
+            self.status_index["available"].add(property_obj.property_id)
 
-        self.user_portfolios[user_id].append(property_id)
+
+    async def add_property(self, user_id: str, property_details: dict) -> str:
+        property_id = str(uuid.uuid4())
+        property_obj = Property(property_id, user_id, property_details)
+
+        async with self.property_lock:
+            self.properties[property_id] = property_obj
+
+            async with self.portfolio_lock:
+        
+                if user_id not in self.user_portfolios:
+                    self.user_portfolios[user_id] = set()
+
+                self.user_portfolios[user_id].append(property_id)
+
+        await self._update_indices(property_obj)
         self.status_index["available"].add(property_id)
 
         return property_id
