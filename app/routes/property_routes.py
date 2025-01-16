@@ -48,8 +48,6 @@ async def search_properties(
         }
 
         properties = await property_search.search_properties(criteria)
-        start = (page - 1) * limit
-        end = start + limit
 
         start_idx = (page - 1) * limit
         end_idx = start_idx + limit
@@ -68,3 +66,17 @@ async def search_properties(
     
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+
+@router.post("/properties/{property_id}/shortlist", status_code=200)
+async def shortlist_property(
+    property_id: str,
+    current_user: str = Depends(get_current_user)
+):
+    success = await property_search.shortlist_property(current_user, property_id)
+    if not success:
+        raise HTTPException(
+            status_code=400,
+            detail="Property not available for shortlisting"
+        )
+    return {"message": "Property shortlisted successfully"}
