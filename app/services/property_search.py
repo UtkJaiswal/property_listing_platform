@@ -56,19 +56,17 @@ class PropertySearch:
         return sorted(properties, key=lambda p: p.details.price)
     
 
-    def shortlist_property(self, user_id: str, property_id: str) -> bool:
+    async def shortlist_property(self, user_id: str, property_id: str) -> bool:
+        async with self.shortlist_lock:
+            async with self.property_manager.index_lock:
+                if property_id not in self.property_manager.status_index["available"]:
+                    return False
 
-        if property_id not in self.status_index["available"]:
-            return False
-        
+            if user_id not in self.user_shortlists:
+                self.user_shortlists[user_id] = set()
 
-        if user_id not in self.user_shortlists:
-            self.user_shortlists[user_id] = set()
-
-        
-        self.user_shortlists[user_id].add(property_id)
-
-        return True
+            self.user_shortlists[user_id].add(property_id)
+            return True
     
 
     def get_shortlisted(self, user_id: str) -> list[Property]:
