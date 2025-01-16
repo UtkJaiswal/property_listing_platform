@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
-from schemas.property_schemas import PropertyCreate
 from services.property_manager import PropertyManager
 from utils.user import get_current_user
 from services.property_search import PropertySearch
 from typing import Optional
+from models.property import Property, PropertyDetails
+
 
 router = APIRouter()
 
@@ -12,7 +13,7 @@ property_search = PropertySearch(property_manager)
 
 @router.post("/properties", status_code=201)
 async def create_property(
-    property_data: PropertyCreate, current_user: str = Depends(get_current_user)
+    property_data: PropertyDetails, current_user: str = Depends(get_current_user)
 ):
     try:
         property_id = property_manager.add_property(current_user, property_data.model_dump())
@@ -46,14 +47,21 @@ async def search_properties(
             "property_type": property_type,
         }
 
-        properties = property_search.search_properties(criteria)
+        properties = await property_search.search_properties(criteria)
         start = (page - 1) * limit
         end = start + limit
 
-        if start >= len(properties):
-            return {"properties": [], "total": len(properties)}
+        start_idx = (page - 1) * limit
+        end_idx = start_idx + limit
+        paginated_properties = properties[start_idx:end_idx]
 
-        return {"properties": properties[start:end], "total": len(properties)}
+        return {
+            "properties": [p.to_dict() for p in paginated_properties],
+            "total": len(properties),
+            "page": page,
+            "limit": limit,
+            "total_pages": (len(properties) + limit - 1)
+        }
     
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
