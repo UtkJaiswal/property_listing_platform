@@ -146,4 +146,4 @@ Maps each property status (e.g., "available", "sold") to a set of property IDs, 
 
 ## Testing
 
-- For testing with dummy data hit the GET API at `http://localhost:8000/test` and the logs are available for the same
+- For testing with dummy data hit the GET API at `http://localhost:8000/test` and the logs are available in the terminal
