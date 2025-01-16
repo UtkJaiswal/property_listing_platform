@@ -1,12 +1,14 @@
 from models.property import Property
+from asyncio import Lock
+from typing import List, Dict, Set, Optional
+from .property_manager import PropertyManager
 
 class PropertySearch:
-    def __init__(self):
-        self.price_index = {}
-        self.location_index = {}
-        self.type_index = {}
-        self.status_index = {"available": set(), "sold": set()}
-        self.user_shortlists = {}
+    
+    def __init__(self, property_manager: PropertyManager):
+        self.property_manager = property_manager
+        self.user_shortlists: Dict[str, Set[str]] = {}
+        self.shortlist_lock = Lock()
 
 
     def search_properties(self, criteria: dict) -> list[Property]:
