@@ -8,14 +8,20 @@ from app.models.property import PropertyDetails
 
 router = APIRouter()
 
+# Creating instances of services to handle property management and search
 property_manager = PropertyManager()
 property_search = PropertySearch(property_manager)
 
+
+
+
+# Endpoint to create a new property
 @router.post("/properties", status_code=201)
 async def create_property(
     property_data: PropertyDetails, current_user: str = Depends(get_current_user)
 ):
     try:
+        # Adds property for a user and returns its random generated unique ID
         property_id = property_manager.add_property(current_user, property_data.model_dump())
         return {"message": "Property created successfully", "property_id": property_id}
     
@@ -26,7 +32,7 @@ async def create_property(
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-
+# Endpoint to search for properties based on criteria (price, location, type) also the results are paginated
 @router.get("/properties/search", status_code=200)
 async def search_properties(
     min_price: Optional[float] = None,
@@ -37,9 +43,11 @@ async def search_properties(
     limit: int = 10
 ):
     try:
+        # basic validations implemented
         if page < 1 or limit < 1:
             raise HTTPException(status_code=400, detail="Page and limit must be positive integers.")
 
+        # search criteria for filtering
         criteria = {
             "min_price": min_price,
             "max_price": max_price,

@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from asyncio import Lock
 
 
-
+# Manages property-related operations such as adding, updating, and indexing properties
 class PropertyManager:
     def __init__(self):
         self.properties: Dict[str, Property] = {}
@@ -18,50 +18,55 @@ class PropertyManager:
             "available": set(),
             "sold": set()
         }
-
+        
+        # Locks to ensure thread safety for different resources
         self.property_lock = Lock()
         self.index_lock = Lock()
         self.portfolio_lock = Lock()
 
-
+    
+    # Updates indexing data structures for efficient searching by price, location, and type.
     async def _update_indices(self, property_obj: Property):
         async with self.index_lock:
             
+            # Indexing by price
             price = property_obj.details.price
             if price not in self.price_index:
                 self.price_index[price] = set()
             self.price_index[price].add(property_obj.property_id)
             
-            
+            # Indexing by location
             location = property_obj.details.location.lower()
             if location not in self.location_index:
                 self.location_index[location] = set()
             self.location_index[location].add(property_obj.property_id)
             
-            
+            # Indexing by type
             prop_type = property_obj.details.property_type.lower()
             if prop_type not in self.type_index:
                 self.type_index[prop_type] = set()
             self.type_index[prop_type].add(property_obj.property_id)
             
-            
+            # Adding property to the available status index
             self.status_index["available"].add(property_obj.property_id)
 
-
+    # Adds a new property and updates indices.
     async def add_property(self, user_id: str, property_details: dict) -> str:
         property_id = str(uuid.uuid4())
         property_obj = Property(property_id, user_id, property_details)
 
         async with self.property_lock:
+            # Adds property to the main storage
             self.properties[property_id] = property_obj
 
             async with self.portfolio_lock:
-        
+                # Tracks the property in the user's portfolio
                 if user_id not in self.user_portfolios:
                     self.user_portfolios[user_id] = set()
 
                 self.user_portfolios[user_id].add(property_id)
 
+        # Updates indices for search
         await self._update_indices(property_obj)
 
         return property_id

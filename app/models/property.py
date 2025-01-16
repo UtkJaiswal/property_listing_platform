@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from typing import Dict, List
 
 
-
+# Pydantic model for property details
 class PropertyDetails(BaseModel):
     location: str
     price: float
@@ -13,7 +13,7 @@ class PropertyDetails(BaseModel):
     amenities: List[str]
 
 
-
+# Represents a property with additional metadata for indexing
 class Property:
     def __init__(self, property_id: str, user_id: str, details: Dict):
         self.property_id = property_id
