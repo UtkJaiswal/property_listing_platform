@@ -69,13 +69,16 @@ class PropertySearch:
             return True
     
 
-    def get_shortlisted(self, user_id: str) -> list[Property]:
-
-        shortlisted_ids  = self.user_shortlists.get(user_id, set())
+    async def get_shortlisted(self, user_id: str) -> List[Property]:
+        async with self.shortlist_lock:
+            shortlisted_ids = self.user_shortlists.get(user_id, set()).copy()
+        
+        async with self.property_manager.index_lock:
+            available_shortlisted = shortlisted_ids & self.property_manager.status_index["available"]
         
         return [
-            self.property_storage[pid]
-            for pid in shortlisted_ids 
-            if pid in self.status_index["available"]
+            self.property_manager.properties[pid]
+            for pid in available_shortlisted
+            if pid in self.property_manager.properties
         ]
         
