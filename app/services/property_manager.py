@@ -1,12 +1,27 @@
 import uuid
 from models.property import Property
+from datetime import datetime
+from typing import Dict, List, Set
+from fastapi import HTTPException
+from asyncio import Lock
+
 
 
 class PropertyManager:
     def __init__(self):
-        self.property_storage = {}
-        self.user_portfolios = {}
-        self.status_index = {"available": set(), "sold": set()}
+        self.properties: Dict[str, Property] = {}
+        self.user_portfolios: Dict[str, Set[str]] = {}
+        self.price_index: Dict[float, Set[str]] = {}
+        self.location_index: Dict[str, Set[str]] = {}
+        self.type_index: Dict[str, Set[str]] = {}
+        self.status_index: Dict[str, Set[str]] = {
+            "available": set(),
+            "sold": set()
+        }
+
+        self.property_lock = Lock()
+        self.index_lock = Lock()
+        self.portfolio_lock = Lock()
 
 
     def add_property(self, user_id: str, property_details: dict) -> str:
