@@ -63,7 +63,6 @@ class PropertyManager:
                 self.user_portfolios[user_id].append(property_id)
 
         await self._update_indices(property_obj)
-        self.status_index["available"].add(property_id)
 
         return property_id
     
