@@ -67,18 +67,33 @@ class PropertyManager:
         return property_id
     
 
-    def update_property_status(self, property_id: str, status: str, user_id: str) -> bool:
-        property_obj = self.property_storage.get(property_id)
+    async def update_property_status(self, property_id: str, new_status: str, user_id: str) -> bool:
+
+        if property_id not in self.properties:
+            raise HTTPException(status_code=404, detail="Property not found")
         
-        if not property_obj or property_obj.user_id != user_id:
-            return False
+
+        property_obj = self.properties[property_id]
         
-        self.status_index[property_obj.status].remove(property_id)
+        if property_obj.user_id != user_id:
+            raise HTTPException(status_code=403, detail="Not authorized to update this property")
+        
+        if new_status not in self.status_index:
+            raise ValueError(f"Invalid status: {new_status}")
+        
 
-        property_obj.status = status
-
-        self.status_index[status].add(property_id)
-
+        async with property_obj.lock:
+            
+            async with self.index_lock:
+                
+                self.status_index[property_obj.status].remove(property_id)
+                
+                
+                await property_obj.update_status(new_status)
+                
+                
+                self.status_index[new_status].add(property_id)
+        
         return True
     
     def get_user_properties(self, user_id: str) -> list[Property]:
