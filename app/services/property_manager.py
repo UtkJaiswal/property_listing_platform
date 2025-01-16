@@ -83,7 +83,7 @@ class PropertyManager:
         
 
         async with property_obj.lock:
-            
+
             async with self.index_lock:
                 
                 self.status_index[property_obj.status].remove(property_id)
@@ -96,10 +96,18 @@ class PropertyManager:
         
         return True
     
-    def get_user_properties(self, user_id: str) -> list[Property]:
-        property_ids = self.user_portfolios.get(user_id, [])
-        return sorted(
-            [self.property_storage[pid] for pid in property_ids],
-            key = lambda p: p.timestamp,
-            reverse=True
-        )
+
+    
+    async def get_user_properties(self, user_id: str) -> List[Property]:
+
+        async with self.portfolio_lock:
+            property_ids = self.user_portfolios.get(user_id, set()).copy()
+
+        properties = []
+
+        for pid in property_ids:
+            if pid in self.properties:
+                properties.append(self.properties[pid])
+
+
+        return sorted(properties, key=lambda p: p.created_at, reverse=True)
