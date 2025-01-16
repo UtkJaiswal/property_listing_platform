@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
-from services.property_manager import PropertyManager
-from utils.user import get_current_user
-from services.property_search import PropertySearch
+from app.services.property_manager import PropertyManager
+from app.utils.user import get_current_user
+from app.services.property_search import PropertySearch
 from typing import Optional, List
-from models.property import PropertyDetails
+from app.models.property import PropertyDetails
 
 
 router = APIRouter()

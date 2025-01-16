@@ -1,6 +1,6 @@
-from models.property import Property
+from app.models.property import Property
 from asyncio import Lock
-from typing import List, Dict, Set, Optional
+from typing import List, Dict, Set
 from .property_manager import PropertyManager
 
 class PropertySearch:

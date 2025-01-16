@@ -1,5 +1,5 @@
 import uuid
-from models.property import Property
+from app.models.property import Property
 from datetime import datetime
 from typing import Dict, List, Set
 from fastapi import HTTPException
