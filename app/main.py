@@ -3,13 +3,11 @@ from app.routes import property_routes
 from app.services.property_manager import PropertyManager
 from app.services.property_search import PropertySearch
 import uvicorn
+from app.test import manual_test
 
 
-app = FastAPI(
-    title="Real Estate Property Platform",
-    description="A property listing and search platform",
-    version="1.0.0"
-)
+
+app = FastAPI()
 
 
 
@@ -26,6 +24,7 @@ app.include_router(
 
 @app.get("/test")
 async def health_check():
+    await manual_test()
     return {"status": "Working API"}
 
 
@@ -37,3 +36,5 @@ if __name__ == "__main__":
         port=8000,
         reload=True
     )
+
+

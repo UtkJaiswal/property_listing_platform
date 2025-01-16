@@ -60,7 +60,7 @@ class PropertyManager:
                 if user_id not in self.user_portfolios:
                     self.user_portfolios[user_id] = set()
 
-                self.user_portfolios[user_id].append(property_id)
+                self.user_portfolios[user_id].add(property_id)
 
         await self._update_indices(property_obj)
 
